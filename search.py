@@ -86,26 +86,22 @@ def depthFirstSearch(problem):
 
     """
 
-    print ("Start: {}".format(problem.getStartState()))
-    print ("Is the start a goal? {}".format(problem.isGoalState(problem.getStartState())))
-    print ("Start's successors: {}".format(problem.getSuccessors(problem.getStartState())))
+    # print ("Start: {}".format(problem.getStartState()))
+    # print ("Is the start a goal? {}".format(problem.isGoalState(problem.getStartState())))
+    # print ("Start's successors: {}".format(problem.getSuccessors(problem.getStartState())))
 
     curr_state = problem.getStartState()
-    frontiers = util.PriorityQueue()
-    frontier_set = set()
+    frontiers = util.Stack()
+    frontiers.push(curr_state)
 
-    frontiers.push(curr_state, 0)
-    frontier_set.add(curr_state)
-
-    node_dict = {curr_state: (None, None, 0)}  # dict of node to (prev node, dir, depth)
+    node_dict = {curr_state: (None, None)}  # dict of node to (prev node, dir, depth)
     explored = set()
 
     while True:
         f = frontiers.pop()  # get the next priority node
-        frontier_set.remove(f)
         explored.add(f)  # add it to explored
 
-        if problem.isGoalState(f):
+        if problem.isGoalState(f): # if we reached goal state, return the path
             path = util.Stack()
             node = f
             while node_dict[node][1] is not None:
@@ -116,10 +112,10 @@ def depthFirstSearch(problem):
                 path_list.append(path.pop())
             return path_list
 
-        next_cand = [n for n in problem.getSuccessors(f) if (n[0] not in explored) and (n[0] not in frontier_set)]
+        next_cand = [n for n in problem.getSuccessors(f) if (n[0] not in explored) and (n[0] not in frontiers.list)]
 
         if len(next_cand) == 0:
-            if len(frontier_set) == 0:
+            if frontiers.isEmpty():
                 raise Exception("there is no goal state")
             else:
                 continue
@@ -128,18 +124,52 @@ def depthFirstSearch(problem):
             node = n[0]
             dir = n[1]
 
-            node_dict[node] = (f, dir, node_dict[f][2]+1)
-            # print("add frontier node {} dir {} depth {}".format(node, node_dict[node][1], node_dict[node][2]))
-            frontiers.push(node, -node_dict[node][2])
-            frontier_set.add(node)
-
+            node_dict[node] = (f, dir)
+            frontiers.push(node)
 
     raise NotImplementedError
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
+
+    curr_state = problem.getStartState()
+    frontiers = util.Queue()
+    frontiers.push(curr_state)
+
+    node_dict = {curr_state: (None, None, 0)}  # dict of node to (prev node, dir, depth)
+    explored = set()
+
+    while True:
+        f = frontiers.pop()  # get the next priority nodes
+        explored.add(f)  # add it to explored
+
+        if problem.isGoalState(f): # if we reached goal state, return the path
+            path = util.Stack()
+            node = f
+            while node_dict[node][1] is not None:
+                path.push(node_dict[node][1])
+                node = node_dict[node][0]
+            path_list = []
+            while not path.isEmpty():
+                path_list.append(path.pop())
+            return path_list
+
+        next_cand = [n for n in problem.getSuccessors(f) if (n[0] not in explored) and (n[0] not in frontiers.list)]
+
+        if len(next_cand) == 0:
+            if frontiers.isEmpty():
+                raise Exception("there is no goal state")
+            else:
+                continue
+
+        for n in next_cand:
+            node = n[0]
+            dir = n[1]
+
+            node_dict[node] = (f, dir)
+            # print("add frontier node {} dir {} depth {}".format(node, node_dict[node][1], node_dict[node][2]))
+            frontiers.push(node)
     util.raiseNotDefined()
 
 
